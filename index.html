@@ -34,16 +34,8 @@
   <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
        chromium.org/developers/how-tos/chrome-frame-getting-started -->
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
-  <header>
-    <input type="text"/>
-    <input type="text"/>
-  </header>
-  <div role="main">
+  <div id="svg_container" role="main">
   </div>
-  <footer>
-
-  </footer>
-
 
   <!-- JavaScript at the bottom for fast page loading -->
 
@@ -54,6 +46,71 @@
   <!-- scripts concatenated and minified via build script -->
   <script src="js/plugins.js"></script>
   <script src="js/script.js"></script>
+  <script type="text/javascript">
+  var data = d3.range(10);
+  var width = 960,
+      height = 500,
+      offset_x = 50,
+      padding = 60,
+      rect_width = 80;
+  var x = d3.scale.linear().domain([0, data.length]).range([0, width - padding]);
+  var y = d3.scale.linear().domain([0, d3.max(data)]).range([0,height - padding]);
+
+  var svg = d3.select("#svg_container").append("svg")
+            .attr({width: width,
+            height :height})
+            .append("g")
+            .attr("transform", "translate(" + x(1) + "," + (height - 20) + ")scale(1,-1)");
+            //Note that you have to essentially flip the group you render in here to get bottom left as origin
+  var x_axis = d3.svg.axis().scale(x).orient("bottom").ticks(10);
+  var y_axis = d3.svg.axis().scale(y).orient("left").ticks(10);
+  //Same deal for axes
+  svg.append("g")
+    .call(x_axis)
+    .attr("transform", "translate(" + [offset_x, 0] + ")scale(1,-1)");
+  svg.append("g")
+    .attr("transform", "translate(" + [offset_x, height - padding] + ")scale(1,-1)")
+    .call(y_axis);
+  svg.selectAll("rect")
+      .data(data).enter()
+      .append("rect")
+      .attr({
+          x: function(d,i){return i*( 5 + rect_width)},
+          y: function(d,i){ return 0},
+          width: rect_width,
+          height: 0,
+          fill: "blue"
+        })
+      .style("opacity", .5)
+      .on("click", function(d, i) { data[i] = data[i] + 1; rerender()})
+      .on("mouseover", function(d,i){ this.setAttribute("style", "opacity:.9")})
+      .on("mouseout", function(d,i){ this.setAttribute("style", "opacity:.5")})
+            .transition()
+            .duration(function(d, i){return d*150})
+            .attr("height", function(d,i){ return y(d)})
+            .ease("sin");
+  function redraw(){
+    svg.selectAll("rect")
+      .data(data).transition()
+            .duration(function(d, i){return d*150})
+            .attr("height", function(d,i){ return y(d)})
+            .ease("quad"); 
+  }
+  function rerender(){
+    svg.selectAll("rect")
+      .data(data)
+        .transition()
+        .duration(400)
+        .attr("height", 0)
+        .each("end", transitionEnd);
+  }
+  function transitionEnd(){
+    d3.select(this).transition()
+        .duration(function(d, i){return d*150})
+        .attr("height", function(d,i){ return y(d)})
+        .ease("quad"); 
+  }
+  </script>
   <!-- end scripts -->
 
   <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
