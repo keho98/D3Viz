@@ -12,7 +12,7 @@
        More info: h5bp.com/i/378 -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>Events and Transition Chaining</title>
+  <title>Quicksort Visualization Using D3.js</title>
   <meta name="description" content="">
 
   <!-- Mobile viewport optimized: h5bp.com/viewport -->
@@ -62,6 +62,7 @@
     data[i]++;
     data[i] *= 40;
   }
+  var events = []
   data.sort(randomize);
   data.sort(randomize);
   svg.selectAll("rect")
@@ -74,7 +75,8 @@
         width: bar_width,
         height: function(d, i){ return d },
         fill: "blue",
-        'class': function(d,i){ return d }
+        'class': function(d,i){ return d },
+        'data-value': function(d){ return d}
       })
       .style("opacity", .6);
   //Taken from stack Overflow (likely not a fair randomization)
@@ -88,16 +90,45 @@
   function randomize(){
     return 0.5 - Math.random();
   }
-  function quicksort(a){
-    if(a.length <= 1) return a;
-    var pivot = a.pop();
-    var smaller = [];
-    var larger = [];
-    for(var i = 0; i < a.length; i++){
-      if(a[i] <=  pivot) smaller.push(a[i]);
-      else larger.push(a[i]);
+  // function quicksort(a){
+  //   if(a.length <= 1) return a;
+  //   var pivot = a.pop();
+  //   var events.push({type: "pivot", options:{pivotEl: pivot}});
+  //   var smaller = [];
+  //   var larger = [];
+  //   for(var i = 0; i < a.length; i++){
+  //     if(a[i] <=  pivot) smaller.push(a[i]);
+  //     else larger.push(a[i]);
+  //   }
+  //   return quicksort(smaller).concat([pivot], quicksort(larger));
+  // }
+  Array.prototype.swap = function(i , j){
+    var tmp = this[i];
+    this[i] = this[j];
+    this[j] = tmp;
+  }
+
+  function partition(array, left, right, pivotIndex){
+    var pivot = array[pivotIndex];
+    array.swap(pivotIndex, right)
+    var storeIndex = left;
+    for( var i = left; i < right; i++){
+      if(array[i] < pivot){
+        array.swap(i, storeIndex);
+        storeIndex = storeIndex + 1;
+      }
     }
-    return quicksort(smaller).concat([pivot], quicksort(larger));
+    array.swap(storeIndex, right);
+    return storeIndex;
+  }
+
+  function quicksort(array, left, right){
+    if( left < right){
+      var pivotIndex = left
+      var pivotNewIndex = partition(array, left, right, pivotIndex);
+      quicksort(array, left, pivotNewIndex - 1);
+      quicksort(array, pivotNewIndex + 1, right)
+    }
   }
   </script>
   <!-- end scripts -->
