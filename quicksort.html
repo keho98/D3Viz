@@ -55,7 +55,8 @@
       spacing = 80,
       bar_width = 30;
       y_offset = height/2,
-      swaps = 0;
+      swaps = 0,
+      transitionTime = 1000;
   var svg = d3.select("#svg_container").append("svg")
             .attr({width: width,
             height :height});
@@ -79,8 +80,6 @@
         y :  function(d,i){ return y_offset - d/2},
         width: bar_width,
         height: function(d, i){ return d },
-        fill: "blue",
-        'class': function(d,i){ return d },
         'data-value': function(d){ return d}
       })
       .style("opacity", .6);
@@ -89,9 +88,9 @@
     svg.selectAll("rect")
       .data(data_copy, String)
       .transition()
-      .duration(1000)
+      .duration(transitionTime)
       .attr("x", function(d,i){ return i * spacing + padding})
-      setTimeout(animateNext, 1000);
+      setTimeout(animateNext, transitionTime);
   }
   function randomize(){
     return 0.5 - Math.random();
@@ -112,11 +111,11 @@
     var tmp = this[i];
     this[i] = this[j];
     this[j] = tmp;
-    console.log("Swap " + i + " and " + j);
   }
 
   function partition(array, left, right, pivotIndex){
     var pivot = array[pivotIndex];
+    view.push({type:'setPivot', options:{value:pivot}});
     array.swap(pivotIndex, right);
     swaps += 1;
     view.push({type:'swap', options:{i1: pivotIndex, i2: right}});
@@ -132,6 +131,7 @@
     array.swap(storeIndex, right);
     view.push({type:'swap', options:{i1: storeIndex, i2: right}});
     swaps += 1;
+    view.push({type:'removePivot', options:{value:pivot}});
     return storeIndex;
   }
 
@@ -151,6 +151,15 @@
         case 'swap':
           data_copy.swap(currentStep.options.i1, currentStep.options.i2);
           redraw();
+          break;
+        case 'setPivot':
+          $('rect[data-value=' + currentStep.options.value + ']').attr('class','pivot')
+          redraw();
+          break;
+        case 'removePivot':
+          $('rect[data-value=' + currentStep.options.value + ']').attr('class','')
+          redraw();
+          break;
       }
     }
   }
@@ -160,7 +169,6 @@
     animateNext(data_copy);
   });
   </script>
-  <!-- end scripts -->
 
   <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
        mathiasbynens.be/notes/async-analytics-snippet -->

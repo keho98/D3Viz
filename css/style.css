@@ -300,3 +300,15 @@ h1{
 svg{
   margin: 0px auto;
 }
+
+rect.pivot{
+  fill:#DD4F05;
+}
+
+rect.set{
+  opacity:1.0;
+}
+
+rect{
+  fill: #003D6B;
+}
