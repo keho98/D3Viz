@@ -54,19 +54,24 @@
       padding = 50,
       spacing = 80,
       bar_width = 30;
-      y_offset = height/2;
+      y_offset = height/2,
+      swaps = 0;
   var svg = d3.select("#svg_container").append("svg")
             .attr({width: width,
             height :height});
+  var view = new Array();
+  var data_copy = new Array();
   for(var i = 0; i < data.length; i++){
     data[i]++;
     data[i] *= 40;
   }
-  var events = []
   data.sort(randomize);
   data.sort(randomize);
+  for(var i = 0; i < data.length; i++){
+    data_copy[i] = data[i];
+  }
   svg.selectAll("rect")
-      .data(data)
+      .data(data_copy)
       .enter()
       .append("rect")
       .attr({
@@ -82,10 +87,11 @@
   //Taken from stack Overflow (likely not a fair randomization)
   function redraw(){
     svg.selectAll("rect")
-      .data(data, String)
+      .data(data_copy, String)
       .transition()
       .duration(1000)
-      .attr("x", function(d,i){ return i * spacing + padding});
+      .attr("x", function(d,i){ return i * spacing + padding})
+      setTimeout(animateNext, 1000);
   }
   function randomize(){
     return 0.5 - Math.random();
@@ -106,19 +112,26 @@
     var tmp = this[i];
     this[i] = this[j];
     this[j] = tmp;
+    console.log("Swap " + i + " and " + j);
   }
 
   function partition(array, left, right, pivotIndex){
     var pivot = array[pivotIndex];
-    array.swap(pivotIndex, right)
+    array.swap(pivotIndex, right);
+    swaps += 1;
+    view.push({type:'swap', options:{i1: pivotIndex, i2: right}});
     var storeIndex = left;
     for( var i = left; i < right; i++){
       if(array[i] < pivot){
         array.swap(i, storeIndex);
+        view.push({type:'swap', options:{i1: i, i2: storeIndex}});
+        swaps += 1;
         storeIndex = storeIndex + 1;
       }
     }
     array.swap(storeIndex, right);
+    view.push({type:'swap', options:{i1: storeIndex, i2: right}});
+    swaps += 1;
     return storeIndex;
   }
 
@@ -130,6 +143,22 @@
       quicksort(array, pivotNewIndex + 1, right)
     }
   }
+
+  function animateNext(){
+    if(view.length > 0){
+      var currentStep = view.shift();
+      switch(currentStep.type){
+        case 'swap':
+          data_copy.swap(currentStep.options.i1, currentStep.options.i2);
+          redraw();
+      }
+    }
+  }
+
+  $(function(){
+    quicksort(data, 0, data.length - 1);
+    animateNext(data_copy);
+  });
   </script>
   <!-- end scripts -->
 
