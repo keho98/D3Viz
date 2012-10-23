@@ -56,7 +56,7 @@
       bar_width = 30;
       y_offset = height/2,
       swaps = 0,
-      transitionTime = 1000;
+      transitionTime = 300;
   var svg = d3.select("#svg_container").append("svg")
             .attr({width: width,
             height :height});
@@ -66,8 +66,7 @@
     data[i]++;
     data[i] *= 40;
   }
-  data.sort(randomize);
-  data.sort(randomize);
+  data.sort(function(){return Math.random() -  0.5;});
   for(var i = 0; i < data.length; i++){
     data_copy[i] = data[i];
   }
@@ -92,21 +91,7 @@
       .attr("x", function(d,i){ return i * spacing + padding})
       setTimeout(animateNext, transitionTime);
   }
-  function randomize(){
-    return 0.5 - Math.random();
-  }
-  // function quicksort(a){
-  //   if(a.length <= 1) return a;
-  //   var pivot = a.pop();
-  //   var events.push({type: "pivot", options:{pivotEl: pivot}});
-  //   var smaller = [];
-  //   var larger = [];
-  //   for(var i = 0; i < a.length; i++){
-  //     if(a[i] <=  pivot) smaller.push(a[i]);
-  //     else larger.push(a[i]);
-  //   }
-  //   return quicksort(smaller).concat([pivot], quicksort(larger));
-  // }
+
   Array.prototype.swap = function(i , j){
     var tmp = this[i];
     this[i] = this[j];
@@ -117,27 +102,24 @@
     var pivot = array[pivotIndex];
     view.push({type:'setPivot', options:{value:pivot}});
     array.swap(pivotIndex, right);
-    swaps += 1;
     view.push({type:'swap', options:{i1: pivotIndex, i2: right}});
     var storeIndex = left;
     for( var i = left; i < right; i++){
       if(array[i] < pivot){
         array.swap(i, storeIndex);
         view.push({type:'swap', options:{i1: i, i2: storeIndex}});
-        swaps += 1;
         storeIndex = storeIndex + 1;
       }
     }
     array.swap(storeIndex, right);
     view.push({type:'swap', options:{i1: storeIndex, i2: right}});
-    swaps += 1;
     view.push({type:'removePivot', options:{value:pivot}});
     return storeIndex;
   }
 
   function quicksort(array, left, right){
     if( left < right){
-      var pivotIndex = left
+      var pivotIndex = Math.floor((left + right)/2);
       var pivotNewIndex = partition(array, left, right, pivotIndex);
       quicksort(array, left, pivotNewIndex - 1);
       quicksort(array, pivotNewIndex + 1, right)
@@ -168,6 +150,20 @@
     quicksort(data, 0, data.length - 1);
     animateNext(data_copy);
   });
+
+  // function quicksort(a){
+  //   if(a.length <= 1) return a;
+  //   var pivot = a.pop();
+  //   var events.push({type: "pivot", options:{pivotEl: pivot}});
+  //   var smaller = [];
+  //   var larger = [];
+  //   for(var i = 0; i < a.length; i++){
+  //     if(a[i] <=  pivot) smaller.push(a[i]);
+  //     else larger.push(a[i]);
+  //   }
+  //   return quicksort(smaller).concat([pivot], quicksort(larger));
+  // }
+
   </script>
 
   <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
